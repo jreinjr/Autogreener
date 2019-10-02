@@ -9,6 +9,11 @@ from autogreener.utils import Bbox, EventHook
 
 
 class ContextMenu(tk.Menu):
+    """
+    Generic context for executing user commands.
+
+    TODO: Encapsulate popup functionality?
+    """
     def __init__(self, master, **kwargs):
         tk.Menu.__init__(self, master, tearoff=0)
         for kwarg in kwargs.items():

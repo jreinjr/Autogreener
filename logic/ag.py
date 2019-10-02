@@ -5,13 +5,16 @@ import cv2
 from PIL import Image
 
 from autogreener.logic import HOCRParser, AGItemList, AGItem
-from autogreener.gui import AutogreenerApp
+from autogreener.gui import AutogreenerGUI
+from autogreener.utils import EventHook
 
 class Autogreener():
     def __init__(self):
         self.tree = None
+        self.autogreeningComplete = EventHook()
 
     def autogreen_image(self, img):
+
         hocr = HOCRParser()
 
         hocr.load_image(img)
@@ -33,6 +36,8 @@ class Autogreener():
         # Repeated function call is a 'temporary' hack
         [self.tree.cluster_overlapping(dilate=(20,-4)) for _ in range(50)]
 
+        self.autogreeningComplete.fire(self.tree)
+        
         return self.tree
 
     def get_palette(self, img, n_colors=5):

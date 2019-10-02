@@ -1,26 +1,15 @@
 from logic import Autogreener
-from gui import AutogreenerApp
+from gui import AutogreenerGUI
 
 import tkinter as tk
 import argparse
 
 if __name__ == '__main__':
-
-
     ag = Autogreener()
-    app = AutogreenerApp()
+    gui = AutogreenerGUI()
 
-    app.autogreenClicked += ag.autogreen_image
+    gui.autogreenClicked += ag.autogreen_image
 
-    from PIL import Image
+    ag.autogreeningComplete += gui.draw_autogreen_items
 
-    img = Image.open('data/input/ss.png')
-    img.show()
-
-    tree = ag.autogreen_image(img)
-
-    print(tree)
-
-    app.previewFrame.draw_agItemList(tree)
-
-    app.mainloop()
+    gui.mainloop()

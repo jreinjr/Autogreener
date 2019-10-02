@@ -14,23 +14,20 @@ class ActionButtonFrame(tk.Frame):
         for kwarg in kwargs.items():
             newButton = tk.Button(
                 self,
-                text=kwarg[0],
+                text=kwarg[0].replace('_', ' '),
                 command=kwarg[1],
                 pady=5,
                 padx=30)
             newButton.pack(fill=X, pady=5, padx=5)
 
 
-class ContextMenu(tk.Menu):
-    def __init__(self, master, **kwargs):
-        tk.Menu.__init__(self, master, tearoff=0)
-        for kwarg in kwargs.items():
-            self.add_command(label=kwarg[0], command=kwarg[1])
-
 if __name__ == '__main__':
     root = tk.Tk()
 
-    abf = ActionButtonFrame(root, Test=( lambda: print('Testing')))
+    abf = ActionButtonFrame(root, 
+            Test                = ( lambda: print('Testing')),
+            Underscore_Space    = ( lambda: print('Testing too'))
+            )
     abf.pack()
 
     root.mainloop()

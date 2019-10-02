@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, LEFT, TOP, RIGHT, BOTTOM, END, YES, HORIZONTAL, BOTH, N, S, E, W, NW, NE, SW, SE, NSEW, X, Y
+from tkinter import filedialog, ttk
 import glob
 import os
 import cv2
@@ -10,8 +10,14 @@ from pathlib import Path
 
 
 class FilePickerFrame(tk.Frame):
+    """
+    Generic GUI solution for selecting a directory and the files within.
+    """
+
     def __init__(self, master):
         tk.Frame.__init__(self, master)
+
+        self.dir_path = Path.cwd()
 
         self.directory_stringVar = tk.StringVar()
 
@@ -22,61 +28,60 @@ class FilePickerFrame(tk.Frame):
 
     def widgets(self):
         sidebarFrame = tk.Frame(self)
-        sidebarFrame.pack(side=LEFT, fill=Y)
+        sidebarFrame.pack(side=tk.LEFT, fill=tk.Y)
 
         directoryFrame = tk.LabelFrame(
             sidebarFrame, text="Directory:", padx=5, pady=5)
-        directoryFrame.pack(side=TOP)
+        directoryFrame.pack(side=tk.TOP)
 
         directoryEntry = tk.Entry(
             directoryFrame,
             textvariable=self.directory_stringVar)
-        directoryEntry.pack(side=LEFT)
+        directoryEntry.pack(side=tk.LEFT)
 
         directoryBrowseButton = tk.Button(
             directoryFrame,
             text="Browse...",
             command=self.onDirectoryBrowseClicked)
-        directoryBrowseButton.pack(side=LEFT)
+        directoryBrowseButton.pack(side=tk.LEFT)
 
         fileFrame = tk.LabelFrame(
             sidebarFrame,
             text="Select PNG image file:",
             padx=5,
             pady=5)
-        fileFrame.pack(side=TOP, expand=True, fill=BOTH)
+        fileFrame.pack(side=tk.TOP, expand=True, fill=tk.BOTH)
 
-        fileListBox = tk.Listbox(fileFrame)
-        fileListBox.bind("<Double-Button-1>", self.onFileListDoubleClick)
-        fileListBox.pack(expand=True, fill=BOTH)
-        self.fileListBox = fileListBox
+        self.fileListBox = tk.ttk.Treeview(fileFrame)
+        self.fileListBox.bind("<Double-Button-1>", self.onFileListDoubleClick)
+        self.fileListBox.pack(expand=True, fill=tk.BOTH)
 
     def onDirectoryBrowseClicked(self):
-        dirPath = self.currentDirectoryPath.get()
+
         dirPath = filedialog.askdirectory(
-            initialdir=dirPath, title="Select directory:")
+            initialdir= self.dir_path, title="Select directory:")
 
-        self.currentDirectoryPath.set(dirPath)
-        self.onDirectoryChanged(dirPath)
-        self.directoryChanged.fire(dirPath)
+        self.dir_path = Path(dirPath)
 
-    def onDirectoryChanged(self, path):
-        files = self.getPNGFilesAtPath(path)
-        self.updateFileListBox(files)
+        files = [Path(f).name for f in self.dir_path.glob("*.png")]
+
+        # Update file listbox
+        [self.fileListBox.delete(i) for i in self.fileListBox.get_children()]
+        [print(f) for f in files]
+        [self.fileListBox.insert('', 0, text=f) for f in files]
+
+        self.directoryChanged.fire(self.dir_path)
+
 
     def onFileListDoubleClick(self, event):
-        lb = event.widget
-        item = lb.get('active')
-        self.currentFileName = item
-        filePath = f"{self.currentDirectoryPath.get()}/{item}"
-        self.filePicked.fire(filePath)
+        focus = event.widget.focus()
+        clicked_item = event.widget.item(focus)['text']
+        if clicked_item is not '':
+            filePath = self.dir_path / clicked_item
+            self.filePicked.fire(filePath)
 
-    def getPNGFilesAtPath(self, path):
-        return [os.path.basename(f) for f in glob.glob(path + "/*.png")]
 
-    def updateFileListBox(self, files):
-        self.fileListBox.delete(0, END)
-        [self.fileListBox.insert(END, f) for f in files]
+   
 
 
 if __name__ == '__main__':

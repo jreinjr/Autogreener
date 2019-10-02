@@ -13,6 +13,9 @@ class HOCRParser():
 
 
     def get_all_with_tag(self, tag):
+        """
+            Returns [xywh, ocrResult, image]
+        """
         convert = {
             'block' : RIL.BLOCK,
             'para' : RIL.PARA,
@@ -29,15 +32,6 @@ class HOCRParser():
             ocrResult = self.api.GetUTF8Text()
             conf = self.api.MeanTextConf()
 
-            """attempts = 0
-            while conf < 80 and attempts < 2:
-                attempts += 1
-
-                im = ImageOps.invert(im)
-                self.api.SetImage(im)
-
-                ocrResult = self.api.GetUTF8Text()
-                conf = self.api.MeanTextConf()"""
             yield [box, ocrResult, im]
 
     def __enter__(self):
